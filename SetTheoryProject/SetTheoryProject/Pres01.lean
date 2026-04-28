@@ -3,9 +3,6 @@ set_option linter.style.whitespace false
 
 /-!
 # Presentation 1: Kuratowski Ordered Pair
-
-This file formalizes the definitions and basic properties of the Kuratowski ordered pair
-within the ZFC set theory model
 -/
 
 open ZFSet
@@ -43,7 +40,12 @@ theorem pair_eq_iff (x y x' y' : ZFSet) :
   · -- (⇒) Forward direction
     intro h
     dsimp [kuratowski_pair] at h
-    sorry
+    by_cases hxy : x = y
+    · -- Case 1 : x = y
+      rw [hxy] at h
+      sorry
+    · -- Case 2 : x ≠ y
+      sorry
   · -- (⇐) Backward direction
     intro h
     rcases h with ⟨hx, hy⟩
