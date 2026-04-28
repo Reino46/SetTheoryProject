@@ -10,11 +10,11 @@ set_option linter.style.emptyLine false
 def intRel (x y : Nat × Nat) : Prop :=
   x.1 + y.2 = y.1 + x.2
 
--- PROBLEM 1: Show that 'intRel' is an equivalnce relation
--- I use the 'Equivalence' typeclass.
+-- PROBLEM 1: Show that `intRel` is an equivalnce relation
+-- I use the `Equivalence` typeclass.
 theorem intRel_equiv : Equivalence intRel := by
   -- I need 3 properties: relexivity, symmetry, transitivity
-  -- with 'Constructor' I break into the main goal into 3 sub-goals
+  -- with `Constructor` I break into the main goal into 3 sub-goals
   constructor
 
   · -- 1. Reflexivity: ∀ x, x ~ x
