@@ -12,10 +12,10 @@ def intRel (x y : Nat × Nat) : Prop :=
   x.1 + y.2 = y.1 + x.2
 
 -- *==========================================================================*
--- *PROBLEM 1: Show that `intRel` is an equivalnce relation*
+-- *PROBLEM 1: Show that `intRel` is an equivalence relation*
 -- I use the `Equivalence` typeclass.
 theorem intRel_equiv : Equivalence intRel := by
-  -- I need 3 properties: relexivity, symmetry, transitivity
+  -- I need 3 properties: reflexivity, symmetry, transitivity
   -- with `Constructor` I break into the main goal into 3 sub-goals
   constructor
 
@@ -28,10 +28,9 @@ theorem intRel_equiv : Equivalence intRel := by
   · -- 2. Symmetry: ∀ x y, x ~ y → y ~ x
     intro x y h
     dsimp [intRel] at *
-    --the symmetry of equality provides the goal directly from h
-    exact h.symm
+    omega
 
-  · -- 3. Transiitity ∀ x y z, x ~ y → y ~ z → x ~ z
+  · -- 3. Transititity ∀ x y z, x ~ y → y ~ z → x ~ z
     intro x y z hxy hyz
     dsimp [intRel] at *
     -- Since we are working with natural numbers and linear equations,
@@ -57,11 +56,7 @@ def Integer : Type := Quotient intSetoid
 -- The `Quotient.mk` (make) function requires a Setoid instance, which it finds automatically
 -- because I declared `intSetoid` as an `instance` above.
 def Integer.mk (m n : ℕ) : Integer :=
-  Quotient.mk intSetoid (n , m)
-
--- I can also define a local notation ⟦x⟧ (typed with \[[ and \]])
--- to represent the equivalence class of x
-local notation "⦃" x "⦄" => Quotient.mk intSetoid x
+  ⟦(n, m)⟧
 
 -- *===========================================================================*
 -- *DEFINITION 2 (PART B): Addition of Integers*
@@ -103,7 +98,7 @@ theorem mulPair_resp (a₁ a₂ : ℕ × ℕ) (ha : intRel a₁ a₂)
   dsimp [mulPair, intRel] at *
   -- Step 2: This proof is non-linear (involves multiplying variables from hypotheses),
   -- so tactics like `omega` cannot solve it directly.
-  -- I transition from Nat to Int to enable substraction and cleaner algebra
+  -- I transition from Nat to Int to enable subtraction and cleaner algebra
   -- `zify` transforms Nat equalities into Int equalities:
   zify at *
   -- Step 3: I rearrange the hypotheses to represent (n1 - m1) = (n2 - m2):
@@ -127,7 +122,7 @@ instance : Mul Integer where
 -- *1. Associativity of Addition*
 theorem Integer.add_assoc (x y z : Integer) : (x + y) + z = x + (y + z) :=
   -- since x, y, z are quotient elements, I use `QuotientInductionOn₃`
-  -- to access their representantive pairs a, b, c : ℕ × ℕ
+  -- to access their representative pairs a, b, c : ℕ × ℕ
   Quotient.inductionOn₃ x y z fun a b c => by
   -- To prove two equivalence classes are equal, `Quotient.sound` reduces
   -- the goal to showing that their inner representatives satisfy `intRel`.
@@ -274,7 +269,7 @@ instance : CommRing Integer where
   right_distrib := by
     intro x y z
     rw [Integer.mul_comm, Integer.mul_add]
-    rw [Integer.mul_comm y z, Integer.mul_comm z x]
+    rw [Integer.mul_comm z x, Integer.mul_comm z y]
   mul_comm := Integer.mul_comm
   zero_mul := by
     intro x
