@@ -33,7 +33,7 @@ theorem intRel_equiv : Equivalence intRel := by
   · -- 3. Transititity ∀ x y z, x ~ y → y ~ z → x ~ z
     intro x y z hxy hyz
     dsimp [intRel] at *
-    -- Since we are working with natural numbers and linear equations,
+    -- Since I am working with natural numbers and linear equations,
     -- the `omega` tactic can automatically solve this arithmetic system
     -- without manual algebraic manipulation.
     omega
@@ -48,7 +48,7 @@ instance intSetoid : Setoid (ℕ × ℕ) where
 
 -- *===========================================================================*
 -- *DEFINTION 2 (PART A): The quotient set ℤ = (ℕ × ℕ) / ~*
--- `Integer` instead of Lean's built in `Int`
+-- I use `Integer` instead of Lean's built in `Int`
 def Integer : Type := Quotient intSetoid
 
 -- A helper function to easily create an `Integer` from a pair of natural numbers.
@@ -99,7 +99,7 @@ theorem mulPair_resp (a₁ a₂ : ℕ × ℕ) (ha : intRel a₁ a₂)
   -- Step 2: This proof is non-linear (involves multiplying variables from hypotheses),
   -- so tactics like `omega` cannot solve it directly.
   -- I transition from Nat to Int to enable subtraction and cleaner algebra
-  -- `zify` transforms Nat equalities into Int equalities:
+  -- The tactic `zify` transforms Nat equalities into Int equalities:
   zify at *
   -- Step 3: I rearrange the hypotheses to represent (n1 - m1) = (n2 - m2):
   have h1 : (a₁.1 : ℤ) - a₁.2 = (a₂.1 : ℤ) - a₂.2 := by linarith
@@ -107,7 +107,7 @@ theorem mulPair_resp (a₁ a₂ : ℕ × ℕ) (ha : intRel a₁ a₂)
   -- Step 4: Prove the goal (it basically is h1 * h2)
   nlinarith
 
--- 3. I lift the multiplication from pairs to the Integer quotient.
+-- 3. I lift the multiplication from Natural Number pairs to the Integer quotient.
 -- Just like addition, I use `Quotient.map₂`.
 def Integer.mul (x y : Integer) : Integer :=
   Quotient.map₂ mulPair mulPair_resp x y
@@ -128,6 +128,7 @@ theorem Integer.add_assoc (x y z : Integer) : (x + y) + z = x + (y + z) :=
   -- the goal to showing that their inner representatives satisfy `intRel`.
   apply Quotient.sound
   dsimp [addPair]
+  -- Replace `≈` in the goal with `intRel` to use dsimp after:
   change intRel _ _
   dsimp [intRel]
   omega
@@ -204,7 +205,7 @@ theorem Integer.one_mul (y : Integer) : 1 * y = y :=
 def negPair (a : ℕ × ℕ) : ℕ × ℕ :=
   (a.2, a.1)
 
--- Step 2: I prove that negation respect the equivalence relation
+-- Step 2: I prove that negation respects the equivalence relation
 -- If a₁ ∼ a₂ then negPair(a₁) ∼ negPair(a₂)
 theorem negPair_resp (a₁ a₂ : ℕ × ℕ) (h: intRel a₁ a₂) :
     intRel (negPair a₁) (negPair a₂) := by
@@ -230,7 +231,7 @@ theorem Integer.add_neg_cancel (x : Integer) : x + (-x) = 0 :=
 
 -- Step 6: Finally, I prove (3) : ∃ x ∈ ℤ, ∀ y ∈ ℤ : x + y = 0
 theorem Integer.exists_neg (x : Integer) : ∃ (y : Integer), x + y = 0 :=
-  -- I use the anonymous constructor ⟨witness, proof⟩ (=Exists.intro)
+  -- I use the anonymous constructor `⟨witness, proof⟩` (=`Exists.intro`)
   ⟨-x, Integer.add_neg_cancel x⟩
 
 -- *4. ∀ x, y, z ∈ ℤ : x * (y + z) = x * y + x * z*
