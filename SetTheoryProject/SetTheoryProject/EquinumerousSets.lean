@@ -3,6 +3,8 @@
 -/
 
 import Mathlib.Tactic
+import Mathlib.Data.Real.Basic
+import Mathlib.Data.Set.Basic
 set_option linter.style.whitespace false
 set_option linter.style.emptyLine false
 
@@ -30,7 +32,8 @@ def Equinumerous (α β : Type) : Prop :=
 local notation α " =_c " β => Equinumerous α β
 
 -- *==============================================================================*
--- *PROBLEM 1: Prove that the relation `=_c` satisfies the properties of an Equivalence*
+-- *PROBLEM 1:*
+-- *Prove that the relation `=_c` satisfies the properties of an Equivalence*
 -- *relation (reflexivity, symmetry, transitivity). Is it an Equivalence relation?*
 
 -- 1. Reflexivity: A =_c A
@@ -142,3 +145,155 @@ theorem equinumerous_trans {A B C : Type} (h1 : A =_c B) (h2 : B =_c C) : A =_c 
 
 -- *=====================================================================================*
 -- *PROBLEM 2:*
+-- *1. Show that ∀ α, β ∈ ℝ with α < b, [0, 1] =_c [α, β]*
+
+-- In Lean, closed intervals are denoted by `Set.Icc` (Interval Closed Closed).
+-- I use `↥` to coerce the Set into a Type so it fits our `=_c` definition.
+theorem equinumerous_closed_intervals (α β : ℝ) (h_less : α < β) :
+    ↥(Set.Icc α β) =_c ↥(Set.Icc (0 : ℝ) 1) := by
+
+  -- I need to define a function f : [0,1] → [α,β]
+  -- The mathematical function is f(x) = (x - α) / (β - α).
+  -- Since the inputs and outputs are Subtypes (they carry a proof that they belong to the interval)
+  -- I must explicitly construct the output with its value and the proof that it falls in [0, 1].
+  let f : ↥(Set.Icc α β) → ↥(Set.Icc (0 : ℝ) 1) := fun x =>
+    -- x.eval is the actual real number. x.property contains the proof that α ≤ x.val and x.val ≤ β
+    let x_val := x.val
+    have hx0 : α ≤ x_val := x.property.1
+    have hx1 : x_val ≤ β := x.property.2
+
+    -- Calculate the new value
+    let y_val := (x_val - α) / (β - α)
+
+    -- Now I must PROVE that 0 ≤ y_val and y_val ≤ 1 to satisfy the output type [0, 1].
+    have h_diff_pos : 0 < β - α := by linarith
+    have hy_left : 0 ≤ y_val := by
+      apply div_nonneg
+      · linarith
+      · linarith
+    have hy_right : y_val ≤ 1 := by
+      rw [div_le_one₀ h_diff_pos]
+      linarith
+
+    -- Construct the final Subtype element: ⟨value, ⟨proof_left, proof_right⟩⟩
+    ⟨y_val, ⟨hy_left, hy_right⟩⟩
+
+  -- Provide f as the witness for the bijection:
+  use f
+
+  -- Now I must prove f is bijective
+  constructor
+  · -- Prove injective
+    dsimp [Injective]
+    intro x₁ x₂ h_eq
+    have h_val_eq : (x₁.val - α) / (β - α) = (x₂.val - α) / (β - α) := by
+      exact congr_arg Subtype.val h_eq
+
+    have h_nonzero : β - α ≠ 0 := by linarith
+
+    -- Multiply both sides by (β - α)
+    have h_mul : (x₁.val - α) / (β - α) *(β - α) = (x₂.val - α) / (β - α) * (β - α) := by
+      rw [h_val_eq]
+
+    -- Cancel out
+    rw [div_mul_cancel₀ (x₁.val - α) h_nonzero, div_mul_cancel₀ (x₂.val - α) h_nonzero] at h_mul
+
+    -- Now linarith can easily solve x₁.val - α = x₂.val - α
+    have h_x_val_eq : x₁.val = x₂.val := by linarith
+
+    exact Subtype.ext h_x_val_eq
+
+  · -- Prove injective
+    dsimp [Surjective]
+    intro y
+    let y_val := y.val
+    have hy0 : 0 ≤ y_val := y.property.1
+    have hy1 : y_val ≤ 1 := y.property.2
+
+    -- The inverse function gives x = α + y * (β - α)
+    let x_val := α + y_val * (β - α)
+
+    -- I must prove that x_val is in [α, β]
+    have hx_left : α ≤ x_val := by nlinarith
+    have hx_right : x_val ≤ β := by nlinarith
+
+    let x : ↥(Set.Icc α β) := ⟨x_val, ⟨hx_left, hx_right⟩⟩
+    use x
+
+    -- Prove f(x) = y
+    apply Subtype.ext
+    have h_nonzero : β - α ≠ 0 := by linarith
+
+    -- I will use this step:
+    have h1 : α + y_val * (β - α) - α = y_val * (β - α) := by ring
+
+    -- I show that f(x) = ((α + y * (β - α)) - α) / (β - α) = y
+    calc
+      (x_val - α) / (β - α) = ((α + y_val * (β - α)) - α) / (β - α) := by rfl
+      _                     = (y_val * (β - α)) / (β - α) := by rw [h1]
+      _                     = y_val := by rw [mul_div_cancel_right₀ y_val h_nonzero]
+
+
+-- *2. Prove that (-π/2, π/2) =_c ℝ*
+
+-- Open intervals are denoted by `Set.Ioo` (Interval Open Open).
+-- Based on the notes, I use f(x) = x / (π/2 - |x|)
+theorem equinumerous_open_real :
+    ↥(Set.Ioo (- (Real.pi / 2)) (Real.pi / 2)) =_c ℝ := by
+
+  -- Define f : (-π/2, π/2) → ℝ
+  let f : ↥(Set.Ioo (- (Real.pi / 2)) (Real.pi / 2)) → ℝ := fun x =>
+    x.val / ((Real.pi / 2) - |x.val|)
+  use f
+  constructor
+
+  · -- Prove f is injective
+    dsimp [Injective]
+    intro x₁ x₂ h_eq
+    have h_val : x₁.val / (Real.pi / 2 - |x₁.val|) = x₂.val / (Real.pi / 2 - |x₂.val|) := h_eq
+    -- Split into 4 cases based on the signs of x₁ and x₂
+    by_cases h1_pos : 0 ≤ x₁.val
+    · by_cases h2_pos : 0 ≤ x₂.val
+
+      · -- CASE 1: x₁ ≥ 0 and x₂ ≥ 0
+        rw [abs_of_nonneg h1_pos, abs_of_nonneg h2_pos] at h_val
+
+        have h_den1_pos : 0 < Real.pi / 2 - x₁.val := by linarith [x₁.property.2]
+        have h_den2_pos : 0 < Real.pi / 2 - x₂.val := by linarith [x₂.property.2]
+
+        -- Cross-multiply using `div_eq_div_iff`
+        have h_cross : x₁.val * (Real.pi / 2 - x₂.val) = x₂.val * (Real.pi / 2 - x₁.val) := by
+          exact (div_eq_div_iff (ne_of_gt h_den1_pos) (ne_of_gt h_den2_pos)).mp h_val
+
+        apply Subtype.ext
+        nlinarith
+
+      · -- CASE 2: x₁ ≥ 0 and x₂ < 0
+        have h2_neg : x₂.val < 0 := by linarith [h2_pos]
+        rw [abs_of_nonneg h1_pos, abs_of_neg h2_neg] at h_val
+
+        -- Clean up the "minus minus" so Lean sees a standard addition
+        have h_clean : Real.pi / 2 - -x₂.val = Real.pi / 2 + x₂.val := by ring
+        rw [h_clean] at h_val
+
+        have h_den1_pos : 0 < Real.pi / 2 - x₁.val := by linarith [x₁.property.2]
+        have h_den2_pos : 0 < Real.pi / 2 + x₂.val := by linarith [x₂.property.1]
+
+        -- Cross-multiply
+        have h_cross : x₁.val * (Real.pi / 2 + x₂.val) = x₂.val * (Real.pi / 2 - x₁.val) :=
+          (div_eq_div_iff (ne_of_gt h_den1_pos) (ne_of_gt h_den2_pos)).mp h_val
+
+        -- nlinarith sees LHS ≥ 0 (since x₁ ≥ 0) and RHS < 0 (since x₂ < 0) -> Contradiction!
+        nlinarith
+
+    · have h1_neg : x₁.val < 0 := by linarith
+      by_cases h2_pos : 0 ≤ x₂.val
+
+      · -- CASE 3:
+        sorry
+      · -- CASE 4:
+        sorry
+  · -- Prove f is surjective
+    dsimp [Surjective]
+    intro y
+    sorry
