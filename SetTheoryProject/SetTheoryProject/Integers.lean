@@ -223,11 +223,11 @@ instance : Neg Integer where
 -- Step 5: I prove the fundamental cancellation property: x + (-x) = 0
 theorem Integer.add_neg_cancel (x : Integer) : x + (-x) = 0 :=
   Quotient.inductionOn x fun a => by
-    apply Quotient.sound
-    dsimp [negPair, addPair]
-    change intRel _ _
-    dsimp [intRel]
-    omega
+  apply Quotient.sound
+  dsimp [negPair, addPair]
+  change intRel _ _
+  dsimp [intRel]
+  omega
 
 -- Step 6: Finally, I prove (3) : ∃ x ∈ ℤ, ∀ y ∈ ℤ : x + y = 0
 theorem Integer.exists_neg (x : Integer) : ∃ (y : Integer), x + y = 0 :=

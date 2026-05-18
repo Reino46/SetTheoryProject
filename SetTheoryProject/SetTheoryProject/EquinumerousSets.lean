@@ -12,19 +12,19 @@ set_option linter.style.longLine false
 -- *=============================================================================*
 -- *DEFINITIONS 1: Functions, Bijections and Equinumerous Types*
 
--- a) A function f : α → β is Injective (1-1) if f(x₁) = f(x₂) implies x₁ = x₂.
+-- a) A function f : α → β is `Injective` (1-1) if f(x₁) = f(x₂) implies x₁ = x₂.
 def Injective {α β : Type} (f : α → β) : Prop :=
   ∀ x₁ x₂ : α, f x₁ = f x₂ → x₁ = x₂
 
--- b) A function f : α → β is Surjective (onto) if every y : β has a pre-image x : α.
+-- b) A function f : α → β is `Surjective` (onto) if every y : β has a pre-image x : α.
 def Surjective {α β : Type} (f : α → β) : Prop :=
   ∀ y : β, ∃ x : α, f x = y
 
--- c) A function is Bijective if it is both Injective and Surjective (1-1 and onto).
+-- c) A function is `Bijective` if it is both Injective and Surjective (1-1 and onto).
 def Bijective {α β : Type} (f : α → β) : Prop :=
   Injective f ∧ Surjective f
 
--- d) Two types α and β are Equinumerous (α =_c β)
+-- d) Two types α and β are `Equinumerous` (α =_c β)
 -- if there exists a bijective function between them
 def Equinumerous (α β : Type) : Prop :=
   ∃ f : α → β, Bijective f
@@ -34,17 +34,17 @@ local notation α " =_c " β => Equinumerous α β
 
 -- *==============================================================================*
 -- *PROBLEM 1:*
--- *Prove that the relation `=_c` satisfies the properties of an Equivalence*
--- *relation (reflexivity, symmetry, transitivity). Is it an Equivalence relation?*
+-- *Prove that the relation =_c satisfies the properties of an Equivalence relation*
+-- *(reflexivity, symmetry, transitivity). Is it an Equivalence relation?*
 
 -- 1. Reflexivity: A =_c A
 -- Based on the notes, I define f : A → A with f(x) = x
 theorem equinumerous_refl {A : Type} : A =_c A := by
   -- In Lean, the identity function f(x) = x is named `id`.
-  -- I provide `id` as the witness for the existential quantifier (∃ f).
+  -- I provide id as the witness for the existential quantifier (∃ f).
   use id
 
-  -- Now I need to prove that `id` is Injective and Surjective.
+  -- Now I need to prove that id is Injective and Surjective.
   -- I use `constructor` to split the goals:
   constructor
 
@@ -68,21 +68,21 @@ theorem equinumerous_symm {A B : Type} (h : A =_c B) : B =_c A := by
   rcases h_bij with ⟨h_inj, h_surj⟩
 
   -- To construct the inverse g, I use the Axiom of Choice:
-  -- Since `f` is surjective, for any `y : B`, there exists some `x : A` such that `f x = y`.
-  -- `Classical.choose` extracts exactly this `x`.
+  -- Since f is surjective, for any y : B, there exists some x : A such that f x = y.
+  -- `Classical.choose` extracts exactly this x.
   let g : B → A := fun y => Classical.choose (h_surj y)
 
-  -- `Classical.choose_spec` provides the proof that our chosen `x` satisfies the equation.
+  -- `Classical.choose_spec` provides the proof that our chosen x satisfies the equation.
   -- In other words, it proves that f(g(y)) = y.
   have h_fg : ∀ y, f (g y) = y := fun y => Classical.choose_spec (h_surj y)
 
-  -- I provide `g` as the witness for the existential quantifier (∃ g).
+  -- I provide g as the witness for the existential quantifier (∃ g).
   use g
 
-  -- Now I must prove that `g` is Bijective (Inj ∧ Surj)
+  -- Now I must prove that g is Bijective (Inj ∧ Surj)
   constructor
 
-  · -- Step 1: Prove that `g` is Injective
+  · -- Step 1: Prove that g is Injective
     -- Goal: ∀ y₁ y₂, g y₁ = g y₂ → y₁ = y₂
     intro y₁ y₂ h_g
     -- We can prove this using a calculation block (`calc`), which mimics handwritten math.
@@ -91,16 +91,16 @@ theorem equinumerous_symm {A B : Type} (h : A =_c B) : B =_c A := by
     _  = f (g y₂) := by rw [h_g]
     _  = y₂       := (h_fg y₂)
 
-  · -- Step 2 : Prove that `g` is Surjective
+  · -- Step 2 : Prove that g is Surjective
     -- Goal: ∀ x : A, ∃ y : B, g y = x
     intro x
-    -- The natural choice for `y` is `f x`. I use it:
+    -- The natural choice for y is f x. I use it:
     use f x
     -- The goal is now: g (f x) = x.
-    -- I know that f (g (f x)) = f x (by substituting `y` with `f x` in `h_fg`).
-    -- Since `f` is injective, f(a) = f(b) implies a = b. I apply this rule.
+    -- I know that f (g (f x)) = f x (by substituting y with f x in h_fg).
+    -- Since f is injective, f(a) = f(b) implies a = b. I apply this rule.
     apply h_inj
-    -- Now the goal perfectly matches `h_fg`
+    -- Now the goal perfectly matches h_fg
     exact h_fg (f x)
 
 -- 3. Transitivity: A =_c B → B=_c C → A =_c C
@@ -114,7 +114,7 @@ theorem equinumerous_trans {A B C : Type} (h1 : A =_c B) (h2 : B =_c C) : A =_c 
   use g ∘ f
   constructor
 
-  · -- Step 1: Prove that `g ∘ f` is Injective
+  · -- Step 1: Prove that g ∘ f is Injective
     -- Goal: ∀ x₁ x₂, (g ∘ f) x₁ = (g ∘ f) x₂ → x₁ = x₂
     intro x₁ x₂ h_gf
     -- By definition of composition, g(f(x₁)) = g(f(x₂))
@@ -122,7 +122,7 @@ theorem equinumerous_trans {A B C : Type} (h1 : A =_c B) (h2 : B =_c C) : A =_c 
     have h_f : f x₁ = f x₂ := hg_inj (f x₁) (f x₂) h_gf
     exact hf_inj x₁ x₂ h_f
 
-  · -- Step 2: Prove that `g ∘ f` is Surjective
+  · -- Step 2: Prove that g ∘ f is Surjective
     -- Goal: ∀ z : C, ∃ x : A, (g ∘ f) x = z
     intro z
     -- Since g is surjective, ∃ y : B such that g(y) = z.
@@ -139,9 +139,9 @@ theorem equinumerous_trans {A B C : Type} (h1 : A =_c B) (h2 : B =_c C) : A =_c 
       _         = z := by rw [hy]
 
 /-
-  *NOTE: The relation `=_c` is NOT an equivalence relation.*
+  *NOTE: The relation =_c is **NOT** an equivalence relation.*
   An equivalence relation must be a subset of a Cartesian product (A × A) of a set A.
-  `=_c` is defined on the class of *ALL SETS* !
+  =_c is defined on the class of **ALL SETS** !
 -/
 
 -- *=====================================================================================*
@@ -153,12 +153,12 @@ theorem equinumerous_trans {A B C : Type} (h1 : A =_c B) (h2 : B =_c C) : A =_c 
 theorem equinumerous_closed_intervals (α β : ℝ) (h_less : α < β) :
     ↥(Set.Icc α β) =_c ↥(Set.Icc (0 : ℝ) 1) := by
 
-  -- I need to define a function f : [0,1] → [α,β]
-  -- The mathematical function is f(x) = (x - α) / (β - α).
-  -- Since the inputs and outputs are Subtypes (they carry a proof that they belong to the interval)
+  -- I need to define a function f : [0, 1] → [α, β]
+  -- Based on the notes I choose f(x) = (x - α) / (β - α).
+  -- Since the inputs and outputs are `Subtypes` (they carry a proof that they belong to the interval)
   -- I must explicitly construct the output with its value and the proof that it falls in [0, 1].
   let f : ↥(Set.Icc α β) → ↥(Set.Icc (0 : ℝ) 1) := fun x =>
-    -- x.eval is the actual real number. x.property contains the proof that α ≤ x.val and x.val ≤ β
+    -- `x.eval` is the actual real number. `x.property` contains the proof that α ≤ x.val and x.val ≤ β
     let x_val := x.val
     have hx0 : α ≤ x_val := x.property.1
     have hx1 : x_val ≤ β := x.property.2
@@ -184,7 +184,7 @@ theorem equinumerous_closed_intervals (α β : ℝ) (h_less : α < β) :
 
   -- Now I must prove f is bijective
   constructor
-  · -- Prove injective
+  · -- Prove Injective
     dsimp [Injective]
     intro x₁ x₂ h_eq
     have h_val_eq : (x₁.val - α) / (β - α) = (x₂.val - α) / (β - α) := by
@@ -204,7 +204,7 @@ theorem equinumerous_closed_intervals (α β : ℝ) (h_less : α < β) :
 
     exact Subtype.ext h_x_val_eq
 
-  · -- Prove injective
+  · -- Prove Surjective
     dsimp [Surjective]
     intro y
     let y_val := y.val
