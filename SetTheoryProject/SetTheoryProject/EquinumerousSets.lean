@@ -7,6 +7,7 @@ import Mathlib.Data.Real.Basic
 import Mathlib.Data.Set.Basic
 set_option linter.style.whitespace false
 set_option linter.style.emptyLine false
+set_option linter.style.longLine false
 
 -- *=============================================================================*
 -- *DEFINITIONS 1: Functions, Bijections and Equinumerous Types*
@@ -287,13 +288,150 @@ theorem equinumerous_open_real :
         nlinarith
 
     · have h1_neg : x₁.val < 0 := by linarith
+
       by_cases h2_pos : 0 ≤ x₂.val
 
-      · -- CASE 3:
-        sorry
-      · -- CASE 4:
-        sorry
+      · -- CASE 3: x₁ < 0 and x₂ ≥ 0
+        rw [abs_of_neg h1_neg, abs_of_nonneg h2_pos] at h_val
+
+        -- Clean up the "minus minus"
+        have h_clean : Real.pi / 2 - - x₁.val = Real.pi / 2 + x₁.val := by ring
+        rw [h_clean] at h_val
+
+        have h_den1_pos : 0 < Real.pi / 2 + x₁.val := by linarith [x₁.property.1]
+        have h_den2_pos : 0 < Real.pi / 2 - x₂.val := by linarith [x₂.property.2]
+
+        -- Cross-multiply
+        have h_cross : x₁.val * (Real.pi / 2 - x₂.val) = x₂.val * (Real.pi / 2 + x₁.val) :=
+          (div_eq_div_iff (ne_of_gt h_den1_pos) (ne_of_gt h_den2_pos)).mp h_val
+
+        -- Contradiction
+        nlinarith
+
+      · -- CASE 4: x₁ < 0 and x₂ < 0
+        have h2_neg : x₂.val < 0 := by linarith
+        rw [abs_of_neg h1_neg, abs_of_neg h2_neg] at h_val
+
+        have h1_clean : Real.pi / 2 - - x₁.val = Real.pi / 2 + x₁.val := by ring
+        have h2_clean : Real.pi / 2 - - x₂.val = Real.pi / 2 + x₂.val := by ring
+        rw [h1_clean, h2_clean] at h_val
+
+        have h_den1_pos : 0 < Real.pi / 2 + x₁.val := by linarith [x₁.property.1]
+        have h_den2_pos : 0 < Real.pi / 2 + x₂.val := by linarith [x₂.property.1]
+
+        have h_cross : x₁.val * (Real.pi / 2 + x₂.val) = x₂.val * (Real.pi / 2 + x₁.val) :=
+          (div_eq_div_iff (ne_of_gt h_den1_pos) (ne_of_gt h_den2_pos)).mp h_val
+
+        apply Subtype.ext
+        nlinarith
+
   · -- Prove f is surjective
     dsimp [Surjective]
     intro y
-    sorry
+
+    -- Basic property: π/2 > 0
+    have h_pi_pos : 0 < Real.pi / 2 := by linarith [Real.pi_pos]
+
+    by_cases hy : 0 ≤ y
+
+    · -- CASE 1: y ≥ 0
+      let x_val := (y * (Real.pi / 2)) / (1 + y)
+
+      have h_den_pos : 0 < 1 + y := by linarith
+
+      -- I prove that x_val < π/2
+      have hx_right : x_val < Real.pi / 2 := by
+        -- transform to product: y*(π/2)=(π/2)*(1+y)
+        rw [div_lt_iff₀ h_den_pos]
+        linarith
+
+      -- I prove that -π/2 < x_val
+      have hx_left : - (Real.pi / 2) < x_val := by
+        -- x_val ≥ 0, so its obviously > π/2
+        have hx_nonneg : 0 ≤ x_val := div_nonneg (by nlinarith) (by linarith)
+        linarith
+
+      -- I create the Subtype
+      let x : ↥(Set.Ioo (- (Real.pi / 2)) (Real.pi / 2)) := ⟨x_val, ⟨hx_left, hx_right⟩⟩
+      use x
+
+      -- I prove f(x)=y
+      change x_val / (Real.pi / 2 - |x_val|) = y
+      have hx_nonneg : 0 ≤ x_val := div_nonneg (by nlinarith) (by linarith)
+
+      -- Remove | . |
+      have h_val : x_val / (Real.pi / 2 - |x_val|) = x_val / (Real.pi / 2 - x_val) := by
+        rw [abs_of_nonneg hx_nonneg]
+      rw [h_val]
+
+      -- The denominator can be simplified to (π/2)/(1+y)
+      have h_den_simp : Real.pi / 2 - x_val = (Real.pi / 2) / (1 + y) := by
+        calc
+          Real.pi / 2 - x_val
+            = Real.pi / 2 - (y * (Real.pi / 2) / (1 + y)) := rfl
+          _ = (Real.pi + y * Real.pi - y * Real.pi) / (2 * (1 + y)) := by field_simp
+          _ = Real.pi / (2 * (1 + y)) := by ring_nf
+          _ = (Real.pi / 2) / (1 + y) := by field_simp
+
+      rw [h_den_simp]
+      -- Simplify denominators (creates 2 goals)
+      rw [div_div_div_cancel_right₀]
+      · -- Goal 1: the equation that is left:
+        rw [mul_div_cancel_right₀ y (ne_of_gt h_pi_pos)]
+      · -- Goal 2: The proof that 1 + y ≠ 0 (so it cancels out):
+        linarith
+
+    · -- CASE 2: y < 0
+      have hy_neg : y < 0 := by linarith
+
+      let x_val := (y * (Real.pi / 2)) / (1 - y)
+
+      have h_den_pos : 0 < 1 - y := by linarith
+
+      -- I prove that -π/2 < x_val
+      have hx_left : - (Real.pi / 2) < x_val := by
+        have h_lt : - (Real.pi / 2) * (1 - y) < y * (Real.pi / 2) := by nlinarith
+        exact (lt_div_iff₀ h_den_pos).mpr h_lt
+
+      -- I prove that x_val < π/2
+      have hx_right : x_val < Real.pi / 2 := by
+        have h_num_neg : y * (Real.pi / 2) < 0 := by nlinarith
+        have hx_neg : x_val < 0 := div_neg_of_neg_of_pos h_num_neg h_den_pos
+        linarith
+
+      -- I create the Subtype
+      let x : ↥(Set.Ioo (- (Real.pi / 2)) (Real.pi / 2)) := ⟨x_val, ⟨hx_left, hx_right⟩⟩
+      use x
+
+      -- I prove f(x) = y
+      change x_val / (Real.pi / 2 - |x_val|) = y
+
+      -- Since y < 0, I also have that x_val < 0
+      have h_num_neg : y * (Real.pi / 2) < 0 := by nlinarith
+      have hx_neg : x_val < 0 := div_neg_of_neg_of_pos h_num_neg h_den_pos
+
+      -- Now I can remove the | . |
+      have h_val : x_val / (Real.pi / 2 - |x_val|) = x_val / (Real.pi / 2 + x_val) := by
+        have h_abs : |x_val| = - x_val := abs_of_neg hx_neg
+        rw [h_abs]
+        ring
+
+      rw [h_val]
+
+      -- The denominator can be simplified to (π/2)/(1-y)
+      have h_den_simp : Real.pi / 2 + x_val = (Real.pi / 2) / (1 - y) := by
+        calc
+          Real.pi / 2 + x_val = Real.pi / 2 + (y * (Real.pi / 2) / (1 - y)) := rfl
+          _                   = (Real.pi - Real.pi * y + Real.pi * y) / (2 * (1 - y)) := by field_simp
+          _                   = Real.pi / (2 * (1 - y)) := by ring
+          _                   = (Real.pi / 2) / (1 - y) := by field_simp
+
+      rw [h_den_simp]
+
+      -- Simplify denominators (rewrites the goal and creates a new one: Prove that 1 - y ≠ 0)
+      rw [div_div_div_cancel_right₀]
+
+      · -- Goal 1: Solve equation
+        rw [mul_div_cancel_right₀ y (ne_of_gt h_pi_pos)]
+      · -- Goal 2: 1 - y ≠ 0
+        linarith
