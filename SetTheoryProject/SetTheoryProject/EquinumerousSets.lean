@@ -505,3 +505,4 @@ theorem powerset_equinumerous_two_pow (A : Type) : Set A =_c (A → Bool) := by
       contradiction
 
   · -- Step 2: Prove Surjective
+    sorry
