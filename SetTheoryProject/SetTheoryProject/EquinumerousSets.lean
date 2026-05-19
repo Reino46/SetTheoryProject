@@ -32,7 +32,7 @@ def Equinumerous (α β : Type) : Prop :=
 -- I introduce the notation `=_c` for Equinumerosity:
 local notation α " =_c " β => Equinumerous α β
 
--- *==============================================================================*
+-- *======================================================================================================*
 -- *PROBLEM 1:*
 -- *Prove that the relation =_c satisfies the properties of an Equivalence relation*
 -- *(reflexivity, symmetry, transitivity). Is it an Equivalence relation?*
@@ -144,7 +144,7 @@ theorem equinumerous_trans {A B C : Type} (h1 : A =_c B) (h2 : B =_c C) : A =_c 
   =_c is defined on the class of **ALL SETS** !
 -/
 
--- *=====================================================================================*
+-- *======================================================================================================*
 -- *PROBLEM 2:*
 -- *1. Show that ∀ α, β ∈ ℝ with α < b, [0, 1] =_c [α, β]*
 
@@ -435,3 +435,73 @@ theorem equinumerous_open_real :
         rw [mul_div_cancel_right₀ y (ne_of_gt h_pi_pos)]
       · -- Goal 2: 1 - y ≠ 0
         linarith
+
+-- *======================================================================================================*
+-- *PROBLEM 4:*
+-- *Show that for every set A, |P(A)| = 2^(|A|)*
+-- Equivalently, I need to prove that the powerset of A (`Set A`) is equinumerous to the set of functions
+-- from A to a 2-element set (for example Bool: true/false)
+
+theorem powerset_equinumerous_two_pow (A : Type) : Set A =_c (A → Bool) := by
+
+  -- Use `Classical Logic` only for this proof:
+  classical
+
+  -- I define the mapping `F` that takes a subset S ⊆ A and returns its
+  -- characteristic function (indicator function):
+  let F : Set A → (A → Bool) := fun S =>
+    fun a => if a ∈ S then true else false
+
+  use F
+  constructor
+
+  · -- Step 1: Prove Injective
+    dsimp [Injective]
+    intro S₁ S₂
+
+    -- Transform the goal from (F S₁ = F S₂ → S₁ = S₂) to (S₁ ≠ S₂ → F S₁ ≠ F S₂)
+    contrapose!
+
+    -- Assume the sets are not equal:
+    intro h_neq
+
+    -- I want to prove F S1 ≠ F S2. Towards contradiction:
+    intro h_eq
+
+    -- Since S1 ≠ S2, there must exist an element `a` that belongs to one set but not the other
+    have h_diff : ∃ a, (a ∈ S₁ ∧ a ∉ S₂) ∨ (a ∉ S₁ ∧ a ∈ S₂) := by
+      by_contra h_all
+      push Not at h_all
+      apply h_neq
+      ext x
+      -- Apply `h_all` to `x`:
+      have hx := h_all x
+
+      constructor
+      · -- x ∈ S₁ → x ∈ S₂
+        exact hx.left
+      · -- x ∈ S₂ → x ∈ S₁
+        intro h2
+        -- Suppose the opposite (x ∉ S₁)
+        by_contra h1
+        have h_not_in_S2 := hx.right h1
+        contradiction
+
+
+    -- Ι extract `a` amd the OR contradiction
+    rcases h_diff with ⟨a, h_or⟩
+    have h_fun := congr_fun h_eq a
+
+    -- I unfold F explicitly to expose the if-then-else structure to the rewrite tactic
+    change (if a ∈ S₁ then true else false) = (if a ∈ S₂ then true else false) at h_fun
+
+    -- Split into the 2 symmetric `WLOG` cases
+    rcases h_or with ⟨h_in1, h_notin2⟩ | ⟨h_notin1, h_in2⟩
+    · -- Case 1: a ∈ S₁ and a ∉ S₂
+      rw [if_pos h_in1, if_neg h_notin2] at h_fun
+      contradiction
+    · -- Case 2: a ∉ S₁ and a ∈ S₂
+      rw [if_neg h_notin1, if_pos h_in2] at h_fun
+      contradiction
+
+  · -- Step 2: Prove Surjective
