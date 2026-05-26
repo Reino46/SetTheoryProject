@@ -505,4 +505,72 @@ theorem powerset_equinumerous_two_pow (A : Type) : Set A =_c (A → Bool) := by
       contradiction
 
   · -- Step 2: Prove Surjective
-    sorry
+    dsimp [Surjective]
+    intro f
+
+    -- I construct the pre-image set S: the set of all elements `a` where f(a) = true (= 1)
+    let S : Set A := { a : A | f a = true }
+    use S
+
+    -- To prove two functions are equal, I must show their outputs are equal for all inputs.
+    ext a
+
+    -- Unfold F
+    dsimp [F]
+
+    -- Since f(a) is a boolean, it has exactly two possible values: false or true.
+    cases h : f a
+
+    · -- Case 1: f(a) = false
+      -- An element belongs to S only if f(a) = true.
+      have h_not_in : a ∉ S := by
+        change ¬(f a = true)
+        rw [h]
+        simp
+
+      -- Since a ∉ S, the if statement evaluates to false
+      rw [if_neg h_not_in]
+
+    · -- Case 2 : f(a) = true
+      have h_in : a ∈ S := by
+        change (f a = true)
+        exact h
+
+      -- Since a ∈ S, the if statement evalutates to true
+      rw [if_pos h_in]
+
+-- *=====================================================================================================*
+-- *PROBLEM 5:*
+-- *Show that for sets A, B, C, (|A|^|B|)^|C| = |A|^(|B|·|C|)*
+
+theorem power_power_equinumerous (A B C : Type) : (C → B → A) =_c (C × B → A) := by
+
+  -- I define the mapping F (on the notes π(.))
+  -- It takes a function `q : C → B → A` and returns a function that takes a pair `(x, y) : C × B`.
+  let F : (C → B → A) → (C × B → A) := fun q =>
+    fun (x, y) => q x y
+
+  use F
+
+  constructor
+
+  · -- Step 1: Prove Injective
+    dsimp [Injective]
+    intro q₁ q₂ h_eq
+
+    -- To prove that two functions q₁ and q₂ are equal, I must show
+    -- that they return the same value for all possible inputs c and b.
+    -- The `ext` tactic applies function extensionality for both arguments.
+    ext c b
+
+    have h_val := congr_fun h_eq (c, b)
+
+    exact h_val
+
+  · -- Step 2: Prove Surjective
+    dsimp [Surjective]
+    intro p
+
+    -- I must construct the pre-image of p : `q : C → B → A`
+    let q : C → B → A := fun c b => p (c, b)
+    use q
