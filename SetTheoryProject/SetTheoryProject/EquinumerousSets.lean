@@ -462,11 +462,11 @@ theorem powerset_equinumerous_two_pow (A : Type) : Set A =_c (A → Bool) := by
     -- Transform the goal from (F S₁ = F S₂ → S₁ = S₂) to (S₁ ≠ S₂ → F S₁ ≠ F S₂)
     contrapose!
 
-    -- Assume the sets are not equal:
-    intro h_neq
+    -- Assume the sets are not equal (h_neq)
+    -- and then I want to prove F S1 ≠ F S2. Towards contradiction (assume h_eq):
+    intro h_neq h_eq
 
-    -- I want to prove F S1 ≠ F S2. Towards contradiction:
-    intro h_eq
+
 
     -- Since S1 ≠ S2, there must exist an element `a` that belongs to one set but not the other
     have h_diff : ∃ a, (a ∈ S₁ ∧ a ∉ S₂) ∨ (a ∉ S₁ ∧ a ∈ S₂) := by
