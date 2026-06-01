@@ -143,7 +143,7 @@ def DominatedBy (α β : Type) : Prop :=
 
 local notation α " ≤_c " β => DominatedBy α β
 
--- I introduce the Schroeder-Bernstein Theorem as an axiom:
+-- I introduce the `Schroeder-Bernstein Theorem` as an axiom:
 axiom schroeder_bernstein {α β : Type} :
   (α ≤_c β) → (β ≤_c α) → (α =_c β)
 
