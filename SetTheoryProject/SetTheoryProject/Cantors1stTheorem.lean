@@ -108,6 +108,9 @@ variable {U : Type} -- an arbitrary universe of elements
 def UnionSet (a : ℕ → ℕ → U) : Set U :=
   { x : U | ∃ j i : ℕ, a j i = x }
 
+#check UnionSet
+#check Set U
+
 -- I define the function `f : ℕ × ℕ → ⋃A_j` with `f(j,i) = a_{ji}` as in the notes
 -- **Note:** Because the union is a `Set U`, the output must be a subtype `↥(UnionSet a)`
 -- Therefore, I return a pair ⟨value, proof⟩.
@@ -116,6 +119,7 @@ def f_union (a : ℕ → ℕ → U) (p : ℕ × ℕ) : ↥(UnionSet a) :=
     dsimp [UnionSet]
     use p.1, p.2⟩
 
+#check f_union
 
 -- Helper Lemma 1: f is surjective
 lemma f_union_surjective (a : ℕ → ℕ → U) : Surjective (f_union a) := by
@@ -175,7 +179,7 @@ lemma dominatedBy_trans {α β γ : Type} (h1 : α ≤_c β) (h2 : β ≤_c γ) 
 
   use g ∘ f
 
-  dsimp [Injective]
+  dsimp [Injective] at *
   intro x₁ x₂ heq
   have h_f_eq : f x₁ = f x₂ := hg (f x₁) (f x₂) heq
   exact hf x₁ x₂ h_f_eq
@@ -227,10 +231,10 @@ lemma nat_dominatedBy_union (a : ℕ → ℕ → U) (h_inj : Injective (a 0)) :
 theorem union_equinumerous_nat (a : ℕ → ℕ → U) (h_inj : Injective (a 0)) :
     ↥(UnionSet a) =_c ℕ := by
 
-  -- I have Union ≤_c ℕ (from Lemma 3)
+  -- I have Union ≤_c ℕ (from Lemma 4)
   have h1 : ↥(UnionSet a) ≤_c ℕ := union_dominatedBy_nat a
 
-  -- I have ℕ ≤_c Union (from Lemma 4)
+  -- I have ℕ ≤_c Union (from Lemma 5)
   have h2 : ℕ ≤_c ↥(UnionSet a) := nat_dominatedBy_union a h_inj
 
   -- By Schroeder-Bernstein, they are equinumerous
