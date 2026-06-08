@@ -47,20 +47,22 @@ axiom schroeder_bernstein {α β : Type} :
 -- *DEFINITION 2:*
 -- *A `binary sequence` is a function f : ℕ → {0, 1} = 2.*
 -- *We write `Δ` for the set of all binary functions*
-def BinarySeq := ℕ → Bool
+def Δ := ℕ → Bool
 
 -- *===============================================================================================*
 -- *PROBLEM 2:*
 -- *Suppose that ∀ n ∈ ℕ, α_n is a binary sequence with elements α_n(0), α_n(1), α_n(2), ...*
 -- *We create a new binary sequence β, with β(n) = 1 - α_n(n). Show that β ≠ α^n ∀ n.*
 
--- I represent the family of sequences α_n as a function `α : ℕ → BinarySeq`.
+-- I represent the family of sequences α_n as a function `α : ℕ → Δ`.
 -- The new sequence β is defined by flipping the n-th bit of the n-th sequence.
 -- In Lean, since the sequences return `Bool`, I use `!` (logical NOT) instead of `1 - x`.
-def β (α : ℕ → BinarySeq) : BinarySeq :=
+def β (α : ℕ → Δ) : Δ :=
   fun n => !(α n n)
 
-theorem cantor_diagonal (α : ℕ → BinarySeq) (n : ℕ) : β α ≠ α n := by
+#check β
+
+theorem cantor_diagonal (α : ℕ → Δ) (n : ℕ) : β α ≠ α n := by
   -- towards contradiction, suppose they are equal
   intro h_eq
   -- Evaluate both functions at point `n`
@@ -80,7 +82,7 @@ theorem cantor_diagonal (α : ℕ → BinarySeq) (n : ℕ) : β α ≠ α n := b
 
 -- In Lean, saying a set is uncountable (or strictly larger than ℕ) means there
 -- is no surjective function from ℕ to the set
-theorem binarySeq_uncountable : ¬ ∃ (f : ℕ → BinarySeq), Surjective f := by
+theorem Δ_uncountable : ¬ ∃ (f : ℕ → Δ), Surjective f := by
   -- Suppose the opposite, that there ∃ such f
   intro h_exists
 
@@ -112,7 +114,7 @@ local infix:50 " <_c " => StrictlyDominated
 -- *I import the properties from Problem 1 and other basic properties as Axioms*
 
 -- Axiom 1 (from Problem 1): ℝ is equinumerous to Δ (set of Binary Sequences)
-axiom real_eq_delta : ℝ =_c BinarySeq
+axiom real_eq_delta : ℝ =_c Δ
 
 -- Axiom 2 (basic property): Equinumerosity is transitive
 axiom eq_trans {A B C : Type} : (A =_c B) → (B =_c C) → (A =_c C)
@@ -136,14 +138,14 @@ theorem nat_StrictlyDominated_real : ℕ <_c ℝ := by
     intro h_eq
 
     -- Transitivity: since ℕ =_c ℝ and ℝ =_c Δ then ℕ =_c Δ
-    have h_N_eq_delta : ℕ =_c BinarySeq := eq_trans h_eq real_eq_delta
+    have h_N_eq_delta : ℕ =_c Δ := eq_trans h_eq real_eq_delta
 
     -- Since ℕ =_c Δ, ∃ f : ℕ → Δ, f surjective
-    have h_surj : ∃ (f : ℕ → BinarySeq), Surjective f :=
+    have h_surj : ∃ (f : ℕ → Δ), Surjective f :=
       eq_implies_surj h_N_eq_delta
 
     -- I use the proof (Cantor diagonal) that there does NOT exist such a function
-    have h_not_surj : ¬ ∃ (f : ℕ → BinarySeq), Surjective f :=
-      binarySeq_uncountable
+    have h_not_surj : ¬ ∃ (f : ℕ → Δ), Surjective f :=
+      Δ_uncountable
 
     contradiction
