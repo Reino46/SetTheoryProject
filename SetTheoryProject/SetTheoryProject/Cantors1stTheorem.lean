@@ -244,7 +244,7 @@ theorem union_equinumerous_nat (a : ℕ → ℕ → U) (h_inj : Injective (a 0))
 -- *PROBLEM 4:*
 -- *Prove that ℚ =_c ℕ*
 
--- Direction 1: ℕ is dominated by ℚ (ℕ ≤_c ℚ)
+-- *Direction 1: ℕ is dominated by ℚ (ℕ ≤_c ℚ)*
 -- I construct the obvious injection g(n) = n
 lemma nat_dominatedBy_rat : ℕ ≤_c ℚ := by
   -- I explicitly state the coercion from ℕ to ℚ using `(n : ℚ)`
@@ -258,8 +258,7 @@ lemma nat_dominatedBy_rat : ℕ ≤_c ℚ := by
   -- The `norm_cast` tactic strips the coercions and returns the equality to ℕ
   norm_cast at h_eq
 
-
--- Direction 2: ℚ is dominated by ℕ (ℚ ≤_c ℕ)
+-- *Direction 2: ℚ is dominated by ℕ (ℚ ≤_c ℕ)*
 -- I will prove ℚ ≤_c ℤ × ℕ ≤_c ℕ × ℕ ≤_c ℕ
 
 -- Helper Lemma 1: ℤ is dominated by ℕ (ℤ ≤_c ℕ)
