@@ -1,6 +1,6 @@
 # Lean 4 Formalization Project: Set Theory Course Notes
 
-This repository contains the formalization of mathematical concepts from the **Set Theory** using *Lean 4* and *Mathlib*.
+This repository contains the formalization of mathematical concepts from **Set Theory** using *Lean 4* and *Mathlib*.
 
 The project is based on University course notes and has an educational character.
 
