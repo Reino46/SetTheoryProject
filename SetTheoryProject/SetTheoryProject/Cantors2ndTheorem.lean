@@ -52,7 +52,7 @@ def Δ := ℕ → Bool
 -- *===============================================================================================*
 -- *PROBLEM 2:*
 -- *Suppose that ∀ n ∈ ℕ, α_n is a binary sequence with elements α_n(0), α_n(1), α_n(2), ...*
--- *We create a new binary sequence β, with β(n) = 1 - α_n(n). Show that β ≠ α^n ∀ n.*
+-- *We create a new binary sequence β, with β(n) = 1 - α_n(n). Show that β ≠ α_n ∀ n.*
 
 -- I represent the family of sequences α_n as a function `α : ℕ → Δ`.
 -- The new sequence β is defined by flipping the n-th bit of the n-th sequence.
