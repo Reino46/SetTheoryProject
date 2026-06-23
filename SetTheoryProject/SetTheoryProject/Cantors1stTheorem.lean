@@ -268,7 +268,7 @@ lemma int_dominatedBy_nat : ℤ ≤_c ℕ := by
     if 0 ≤ z then
       2 * z.natAbs
     else
-      2 * z.natAbs -1
+      2 * z.natAbs - 1
 
   use f
 
