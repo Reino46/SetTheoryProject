@@ -357,3 +357,6 @@ theorem rat_equinumerous_nat : ℚ =_c ℕ := by
   have h_bwd : ℕ ≤_c ℚ := nat_dominatedBy_rat
 
   exact schroeder_bernstein h_fwd h_bwd
+
+
+#print axioms rat_equinumerous_nat

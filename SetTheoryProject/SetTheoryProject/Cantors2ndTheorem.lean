@@ -102,6 +102,8 @@ theorem Δ_uncountable : ¬ ∃ (f : ℕ → Δ), Surjective f := by
   rw [hn_eq] at h_neq
   contradiction
 
+#print axioms Δ_uncountable
+
 -- *--------------------------------------------------------*
 -- *Towards the Conclusion ℕ ≠_c ℝ and specifically ℕ <_c ℝ*
 
